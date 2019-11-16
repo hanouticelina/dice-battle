@@ -25,7 +25,7 @@ def probabilities(D):
     Retourne un tableau contenant l'ensemble des P(d,k) pour d inférieur ou égale à D
     ----------------------------------------------------
     Args:
-        - D : le nombre de dés maximum
+        - D : nombre maximum de dés
     """
     K = np.arange(2,6*D+1)
     values_D = np.arange(1,D+1)
@@ -53,7 +53,7 @@ def player_roll(d,draw):
     ----------------------------------------------------
     Args:
         - d : nombre de dés
-        - draw : boolée permettant de controler l'affichage des dés
+        - draw : booléen permettant de controler l'affichage des dés
     """
     counter = 0
     dices = []
@@ -78,7 +78,7 @@ def random_strategy(D):
     Retourne un nombre entre 1 et D correspondant à une stratégie aléatoire utilisée comme baseline
     ----------------------------------------------------
     Args:
-        - D : nombre de dés maximum
+        - D : nombre maximum de dés
     """
     return random.randint(1,D)
 
@@ -87,7 +87,7 @@ def blind_strategy(D):
     Retourne un nombre de dés d*(D) correspondant à la stratégie aveugle
     ----------------------------------------------------
     Args:
-        - D : nombre de dés maximum
+        - D : nombre maximum de dés
     """
     expected = np.array([(4*d-1)*((5/6)**d) + 1 for d in range(1,D+1)])
     return np.argmax(expected)
@@ -104,7 +104,7 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
         - strategy1 : stratégie du joueur 1
         - strategy2 : stratégie du joueur 2
         - win_score : Nombre de points à atteindre
-        - number_dice : nombre de dés maximum
+        - number_dice : nombre maximum de dés 
         - draw : booléen permettant de controler l'affichage des dés
     """
     score_player1 = 0
