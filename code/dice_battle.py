@@ -38,8 +38,9 @@ def player_roll(d,draw):
         dices.append(dice)
         if dice == 1 :
             dice_1 = True
-    print("Faces obtenues : \n")
+
     if draw:
+        print("Faces obtenues : \n")
         dc.print_dice_rolls(dices)
     if dice_1 is True:
         counter = 1
@@ -79,6 +80,7 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
             print("LOSER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
+            print("Nombre de tour : ",nb_turns+1)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             break
 
@@ -95,6 +97,7 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
             print("LOSER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
+            print("Nombre de tour : ",nb_turns+1)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             break
 
