@@ -96,7 +96,7 @@ if __name__=="__main__":
 
 
             elif val == "test" :
-                print("pas encore implémenter\n")
+                print("Coming Soon\n")
 
             else :
                 raise ContinueMainLoop()
