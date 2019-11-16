@@ -117,7 +117,7 @@ def expected_rewards(strategy1,strategy2, nb_games,N): #nécessite des modificat
 
 
 
-def main():
+"""def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('number_dice', type=int, help='the number of dice to roll at each turn')
     ap.add_argument('target_score', type=int, help='the target score')
@@ -126,7 +126,7 @@ def main():
     args = ap.parse_args()
     D = args.number_dice
     N =args.target_score
-    """print(probabilities(D))"""
+    print(probabilities(D))
     if args.strategy1 == 'blind':
         strat1  = blind_strategy
     else:
@@ -138,4 +138,4 @@ def main():
         strat2  = random_strategy
     winner = play(strat1, strat2,N,D)
 
-main()
+main()"""
