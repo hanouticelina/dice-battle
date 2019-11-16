@@ -6,6 +6,13 @@ import print_dice as dc
 
 
 def Q(d,k):
+    """
+    Calcule et retourne la probabilité d'obtenir k points en jetant d dés
+    ----------------------------------------------------
+    Args:
+        - d : le nombre de dés
+        - k : le nombre de points
+    """
     if d == 1:
         return 1/5
     if k < 2*d or k > 6*d:
@@ -14,6 +21,12 @@ def Q(d,k):
         return 1/5*sum([Q(d-1,k-j) for j in range(2,7)])
 
 def probabilities(D):
+    """
+    Retourne un tableau contenant l'ensemble des P(d,k) pour d inférieur ou égale à D
+    ----------------------------------------------------
+    Args:
+        - D : le nombre de dés maximum
+    """
     K = np.arange(2,6*D+1)
     values_D = np.arange(1,D+1)
     P = np.zeros([D,6*D])
@@ -27,9 +40,21 @@ def probabilities(D):
     return P
 
 def roll_dice():
+    """
+    Retourne un nombre entre 1 et 6 qui correspond à un jet de dés
+    ----------------------------------------------------
+    Args:
+    """
     return random.randint(1,6)
 
 def player_roll(d,draw):
+    """
+    Retourne le nombre total de points obtenus en lançant d dés
+    ----------------------------------------------------
+    Args:
+        - d : nombre de dés
+        - draw : boolée permettant de controler l'affichage des dés
+    """
     counter = 0
     dices = []
     dice_1 = False
@@ -49,9 +74,21 @@ def player_roll(d,draw):
     return counter
 
 def random_strategy(D):
+    """
+    Retourne un nombre entre 1 et D correspondant à une stratégie aléatoire utilisée comme baseline
+    ----------------------------------------------------
+    Args:
+        - D : nombre de dés maximum
+    """
     return random.randint(1,D)
 
 def blind_strategy(D):
+    """
+    Retourne un nombre de dés d*(D) correspondant à la stratégie aveugle
+    ----------------------------------------------------
+    Args:
+        - D : nombre de dés maximum
+    """
     expected = np.array([(4*d-1)*((5/6)**d) + 1 for d in range(1,D+1)])
     return np.argmax(expected)
 
@@ -60,6 +97,16 @@ def optimal_strategy(state):
 
 
 def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #nécessite des modifications pour la variante simultanée
+    """
+    Méthode permettant de simuler une partie entre deux joueurs
+    ----------------------------------------------------
+    Args:
+        - strategy1 : stratégie du joueur 1
+        - strategy2 : stratégie du joueur 2
+        - win_score : Nombre de points à atteindre
+        - number_dice : nombre de dés maximum
+        - draw : booléen permettant de controler l'affichage des dés
+    """
     score_player1 = 0
     score_player2 = 0
     nb_turns = 1
@@ -106,7 +153,16 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
         nb_turns += 1
     return winner
 
-def expected_rewards(strategy1,strategy2, nb_games,N): #nécessite des modifications pour la variante simultanée
+def expected_rewards(strategy1,strategy2, nb_games,N): #nécessite des modifications pour la variante simultanée, TODO: ajouter la possibilité de faire varier D
+    """
+    Méthode permettant de calculer l'esperance de gain pour le joueur 1 en simulant plusieurs parties
+    ----------------------------------------------------
+    Args:
+        - strategy1 : stratégie du joueur 1
+        - strategy2 : stratégie du joueur 2
+        - nb_games : nombre de parties à simuler
+        - N : Nombre de points à atteindre (borne supérieure de l'intervalle)
+    """
     rewards = np.zeros(N)
     for n in range(N):
         for i in range(nb_games):
