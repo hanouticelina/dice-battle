@@ -27,7 +27,6 @@ def probabilities(D):
     Args:
         - D : nombre maximum de dés
     """
-    K = np.arange(2,6*D+1)
     values_D = np.arange(1,D+1)
     P = np.zeros([D,6*D])
     P[:,0] = list(map(lambda d : 1 - (5/6)**d, values_D))
@@ -104,7 +103,7 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
         - strategy1 : stratégie du joueur 1
         - strategy2 : stratégie du joueur 2
         - win_score : Nombre de points à atteindre
-        - number_dice : nombre maximum de dés 
+        - number_dice : nombre maximum de dés
         - draw : booléen permettant de controler l'affichage des dés
     """
     score_player1 = 0
