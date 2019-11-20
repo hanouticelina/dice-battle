@@ -1,0 +1,188 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[table]{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{float}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+%\usepackage{amsmath}
+
+\title{Rapport de Projet}					
+\author{hanouticelina}								 
+\date{Décembre 2019}
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\begin{document}
+\begin{titlepage}
+	\centering
+    \vspace{0.7cm}
+    \includegraphics[scale = 0.4]{sorbonne.png}\\[2cm]
+    \textbf{\LARGE MOGPL}\\[0.4 cm]
+    \Large{Modélisations, Optimisation, Graphes\\et Programmation Linéaire}\\[1 cm]
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{\Huge{\bfseries \thetitle}}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft} \large
+			\emph{Étudiants:}\\
+			Celina HANOUTI\\
+			Idles MAMOU
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+			\begin{flushright} \large
+			\emph{Numéros Étudiants:} \\
+			3522046\\
+			à compléter
+		\end{flushright}
+	\end{minipage}\\[4 cm]
+	{\large \thedate}\\[3 cm]
+	\vfill
+\end{titlepage}
+\tableofcontents
+\newpage
+
+\section{Introduction}
+On considère un jeu de dés à deux joueurs qui consiste, à chaque tour, à lancer entre 1 et $D$ dés à six faces, le but du jeu étant d'atteindre en premier $N$ points.
+\begin{itemize}
+  \item Si au moins l'un des dés tombe sur 1, le nombre de points marqués lors du tour est 1.
+  \item Sinon le nombre de points est la somme des dés lancés.
+\end{itemize}
+Le but de ce projet est de trouver une stratégie optimale à ce jeu en considérant l'aspect théorique et pratique du problème et de comparer cette dernière à d'autre stratégie de l'état de l'art.
+Par ailleurs on étudiera deux variantes du jeu: la variante séquentielle et la variante simultanée.
+
+\newpage
+\section{Probabilités}
+Lorsqu'un joueur lance $d$ $\geq$ 1 dés, soit il obtient un seul point, soit il obtient entre 2$d$ et 6$d$ (au pire, les $d$ dés tomberont tous sur la face 2 et au mieux, les $d$ dés tomberont tous sur la face 6).
+\newline
+On définit $P(d,k)$ comme étant la probabilité qu'un joueur qui lance $d$ dés obtienne $k$ points.
+La probabilité d'obtenir un point ($k$ = 1) est la probabilité qu'aucun dés lancés ne tombe sur la face 1, on a donc : $P(d,1)$ = 1 - $\left(\frac{5}{6}\right)^d$.
+\newline
+Comme les dés sont numérotés de 1 à 6, il est évident que le maximum de points que l'on peut obtenir en lançant $d$ dés est 6$d$, il est cependant impossible d'obtenir un score inférieur à 2$d$ ceci s'explique par le fait qu'il n'existe pas de vecteur [$x_1$,$x_2$, .. ,$x_d$] strictement positif tel que:
+\newline
+$\forall i, 1 \leq i \leq d, x_i \neq 1$ et $x_1+x_2+ .. +x_d = k$ pour $k < 2d$. 
+\newline
+On a donc : $P(d,k) = 0$ pour $2 \leq k \leq 2d-1$ et $k > 6$.
+Pour $2d \leq k \leq 6d$ et $d$ $geq$ 2, on définit $Q(d,k)$ comme étant la probabilité conditionnelle d'obtenir $k$ points en jetant $d$ dés sachant qu'aucun dé n'est tombé sur 1.
+On peut définir cette probabilité récursivement, en effet, une interprétation ensembliste de la formule est peut être plus parlante que la formule elle-même:
+\newline
+considérons les évènements $E_k^d$ = "obtenir $k$ points en lançant $d$ dés sachant qu'aucun dé n'est tombé sur 1".
+\newline
+et $F_k$ = "obtenir $k$ points au $d$-ième lancé".
+\\
+\newline
+On a donc $E_k^d$ = $\bigcup_{j=2}^{6}$ ($E_{k-j}^{d-1} \cap F_j$).
+\newline
+\\
+De plus,
+$P(F_j) = \frac{1}{5}$ pour tout $2 \leq j \leq 6$ et $P(E_k^d) = Q(d,k)$.
+\newline
+\\
+On a bien la formule $Q(d,k) = \sum_{j=2}^6 \frac{Q(d-1,k-j)}{5}$.
+\\
+et on a : $P(d,k) = \left(\frac{5}{6}\right)^d Q(d,k)$.
+\newline
+\\
+Les cas d'initialisation sont les cas où $d$ = 1 auquel cas, $Q(d,k)$ = $\frac{1}{5}$, $k$ < 2$d$ ou $k$ > 6$d$ auquel cas $Q(d,k)$ = 0.
+
+\begin{algorithm}
+\caption{}
+\begin{algorithmic}[1]
+\Require 
+\Function{}{}
+\EndFunction
+\Statex
+
+\end{algorithmic}
+\end{algorithm}
+\newline
+\\
+\section{Variante séquentielle}
+\subsection{Stratégie aveugle}
+À chaque tour, chacun des joueurs devra choisir le nombre de dés à lancer, en effet, plus on lance de dés, plus on augmente la probabilité que l'un d'eux tombe sur 1, et moins on en lance, moins on a de chance d'obtenir un large score. On considère ici une stratégie simple, qui consiste à choisir un nombre de dés qui maximise en moyenne le nombre de points. Pour un lancé, si celui-ci ne tombe pas sur la face 1, on gagne en moyenne 4 points, sur $d$ lancés, on gagne donc en moyenne 4$d$ points avec une probabilité de $\left(\frac{5}{6}\right)^d$ et on gagne 1 point avec une probabilité de 1 - $\left(\frac{5}{6}\right)^d$. L'ésperance $EP(d)$ du nombre de points obtenus s'obtient avec la formule suivante: 
+\newline
+\\
+$$EP(d) = 4d\left(\frac{5}{6}\right)^d + 1 - \left(\frac{5}{6}\right)^d$$
+\newline
+\\
+Q2) L'expression est maximale pour $d$ = 5 indépendemment de $D$ (il suffit d'annuler la dérivée par rapport à $d$, on trouve approximativement 5).
+\newline
+\\
+Q3) Si on se place dans le cas où $D$ = 10, on a $d^*(10) = 5$, si lors des 4 premiers lancés, on tombe sur 4 fois la face 6, on sera tout de même obligé de lancer un 5ème lancé et risquer de perdre les 24 points (La probabilité de tomber sur la face 1 n'étant pas nulle). (Il existe plusieurs autres exemples où le joueur n'a pas intérêt à utiliser cette stratégie).
+\subsection{Programmation dynamique}
+Si $i$ $\geq$ 100 et j < 100 : $EG(i,j) = 1$ et $EG(j,i) = -1$ 
+\\
+de façon symétrique,
+\\
+Si $j$ $\geq$ 100 et i < 100 : $EG(j,i) = 1$ et $EG(i,j) = -1$ 
+\\
+(Principe d'un jeu à somme nulle).
+\\
+Sinon:
+\\
+$EG(i,j) = G(i,j) - G(j,i)$
+\\
+avec $G(i,j)$ la probabilité que le joueur 1 gagne à l'état $(i,j)$.
+\\
+Si $i$ $\geq$ 100 et j < 100 : $G(i,j) = 1$ et $G(j,i) = 0$.
+$$G(i,j) = \max_d \left( P(d,1)(1-G(j,i-1)) + \sum_{k=2d}^{6d} P(d,k)(1-G(j,i-k))\right)$$
+$1-G(j,i-k)$ est la probabilité que le joueur adverse ne gagne pas à l'état $(j,i-k)$. On part du principe qu'on arrive à l'état $(i,j)$ en prenant en compte toutes les issues possibles (par rapport au score) en lançant $d$ dés. Je ne suis pas très sure de cette formule, et je n'ai pas d'idée pour l'instant pour la recurrence de EG.
+
+
+\section{Variante simultanée}
+\subsection{Jeu en un coup}
+On définit la stratégie de chaque joueur $i$ avec un vecteur $[p_i(1),.. p_i(D)]$ où $p_i(d)$ est la probabilité avec laquelle nous lançons $d$ dés. $p_i(d) \geq 0 $ et $\sum_{d=1}^D p_i(d) = 1$ pour chaque $i \in {1,2}$.
+
+\newline
+On considère une approche simplifiée où l'on lance qu'une seule fois les dés.
+\newline
+Q10) $EG_1(d_1,d_2)$ est l'espérance de gain du joueur 1 s'il lance $d_1$ dés alors que le joueur 2 en lance $d_2$, soit $k$ $\in [1,..,6d_1]$ et $l$ $\in [1,..,6d_2]$ obtenus par le joueur 1 et le joueur 2 réspectivement. Le gain du joueur 1 est +1 si $k > l$, 0 si $k = l$ et -1 si $k < l$. L'espérance de gain est donc donné par la formule suivante:
+$$EG_1(d_1,d_2) = \sum_{k=1}^{6d_1} \sum_{l=1}^{k-1} P(d_1,k)P(d_2,l) - \sum_{k=1}^{6d_1} \sum_{l=k+1}^{6d_2} P(d_1,k)P(d_2,l)$$
+\newline
+
+Q11) On sait que l'espérance de gain du joueur 1 s'écrit de la manière suivante:
+$$p_1^T EG_1 p_2 = \sum_{i=1}^D \sum_{j=1}^D p_1(i)EG_1(i,j)p_2(j)$$
+Si le joueur 2 connait la stratégie du joueur 1(ie le vecteur $[p_1(1),.. p_2(D)]$), donc sa stratégie optimale consiste à minimiser l'espérance de gain du joueur 1, c'est à dire:
+$$ \min_{p_2} \sum_{i=1}^D \sum_{j=1}^D p_1(i)EG_1(i,j)p_2(j)$$
+
+\newline
+Q12) Du point de vue du joueur 1, la stratégie du joueur 2 est inconnue mais nous la supposons optimale ainsi la stratégie optimale du joueur 1 consiste à : 
+$$max_{p_1} min_{p_2} p_1^T EG_1 p_2$$
+On sait également qu'en optimisant sa stratégie, ce dernier peut omettre les stratégies mixtes du joueur 2 donc la stratégie optimale du joueur 1 peut s'écrire : 
+$$max_{p_1} min_{j} p_1^T EG_1^j = max_{p_1} min_{j} \{\sum_{i=1}^D p_1(i)EG_1(i,j)\}$$ 
+avec $EG_1^j$ la colonne $j$ de $EG_1$
+Le programme linéaire à résoudre pour le joueur 1 est:
+$$ max \mbox{ z} $$
+s.t
+$$ z \leq \sum_{i=1}^D p_1(i) EG_1(i,j) \mbox{ pour tout } j \in \{1,..,D\}$$
+$$\sum_{i=1}^D p_1(i) = 1$$
+
+
+\subsection{Cas général}
+
+Q15)$$
+EG_1(i,j) = \left\{
+    \begin{array}{ll}
+        +1 & \mbox{si } i \geq N \\
+        -1 & \mbox{si } j \geq N
+    \end{array}
+\right.
+$$
+
+Q16)
+$$E_1^{d_1,d_2}(i,j) = \sum_{k=1}^{6d_1} \sum_{l=1}^{6d_2} EG(k+i,l+j)P(d_1,k)P(d_2,l)$$
+
+Q18) 
+$$EG_1(i,j) = \sum_{d_1=1}^{D} \sum_{d_2=1}^{D}p_1(d_1)p_2(d_2)E_1^{d_1,d_2}(i,j)$$
+\end{document}

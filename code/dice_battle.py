@@ -173,7 +173,22 @@ def expected_rewards(strategy1,strategy2, nb_games,N): #nécessite des modificat
         rewards[n] = rewards[n]/nb_games
     return np.arange(20,N+20), rewards
 
-
+def EG(d1,d2,P):
+    s = 0
+    for k in range(1,6*d1+1):
+        for l in range(1,6*d2+1):
+            if k > l :
+                s += P[d1-1][k-1] * P[d2-1][l-1]
+            elif k < l :
+                s -= P[d1-1][k-1] * P[d2-1][l-1]
+    return s
+def matrice_gain(D):
+    P = probabilities(D)
+    G = np.zeros([D,D])
+    for d1 in range(1, D+1):
+        for d2 in range(1, D+1):
+            G[d1-1][d2-1] = EG(d1,d2,P)
+    return G
 
 """def main():
     ap = argparse.ArgumentParser()
