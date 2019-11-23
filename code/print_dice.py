@@ -1,8 +1,8 @@
 from random import randrange
-
+blue = '\x1b[34;6m'
 def get_single_dice_face(dice_roll, eye='o '):
     """Permet de dessiner une face d'un dés"""
-
+    print(blue)
     r = dice_roll - 1
     dice_str = '+-----+\n| {0} {1} |\n| {2}'.format(eye[r<1], eye[r<3], eye[r<5])
     return dice_str + eye[r&1] + dice_str[::-1]

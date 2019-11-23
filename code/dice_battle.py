@@ -3,6 +3,9 @@ import numpy as np
 import argparse
 import print_dice as dc
 
+red = '\x1b[31;6m'
+bold = '\x1b[;1m'
+blue = '\x1b[34;6m'
 
 
 def Q(d,k):
@@ -64,7 +67,7 @@ def player_roll(d,draw):
             dice_1 = True
 
     if draw:
-        print("Faces obtenues : \n")
+        print(blue + "Faces obtenues : \n")
         dc.print_dice_rolls(dices)
     if dice_1 is True:
         counter = 1
@@ -94,8 +97,14 @@ def blind_strategy(D):
 def optimal_strategy(state):
     pass
 
-
-def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #nécessite des modifications pour la variante simultanée
+def set_dices(D):
+    while True:
+        print(bold + red + " how many dices?\n")
+        d = int(input("d = "))
+        if d <= D:
+            break
+    return d
+def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False,): #nécessite des modifications pour la variante simultanée
     """
     Méthode permettant de simuler une partie entre deux joueurs
     ----------------------------------------------------
@@ -110,26 +119,28 @@ def play(strategy1, strategy2, win_score = 100, number_dice = 10, draw=False): #
     score_player2 = 0
     nb_turns = 1
     while score_player1 < win_score or score_player2 < win_score :
-        print("Turn : ", nb_turns)
+        print(blue + "Turn : ", nb_turns)
         print("Player 1 score : ", score_player1)
         print("Player 2 score : ", score_player2)
         print()
 
-        print("Player 1 rolls ..")
+        print(blue + "Player 1 rolls ..")
         d1 = strategy1(number_dice)
         score1 = player_roll(d1,draw)
         score_player1 += score1
 
         if score_player1 >= win_score:
             winner = 1
-            print("\n\n\n\n")
+            print(blue + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
             print("LOSER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
             print("Nombre de tour : ",nb_turns+1)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             break
-
+        print("Player 1 score : ", score_player1)
+        print("Player 2 score : ", score_player2)
+        print()
         print()
 
         print("Player 2 rolls ..")
