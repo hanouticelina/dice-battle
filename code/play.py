@@ -77,8 +77,8 @@ def main():
         if choice_game == 0:
             choice_d = 0
             while not choice_d:
-                strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random \n 'blind' pour la stratégie aveugle \n ")
-                if(strat1 != 'random') and (strat1 != 'blind'):
+                strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random \n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
+                if(strat1 != 'random') and (strat1 != 'blind') and (strat1 != 'optimal') :
                     print("Veuillez saisir une stratégie valide");
                     continue
                 choice_d = 1
@@ -86,8 +86,10 @@ def main():
             choice_d = 0
             if strat1 == 'blind':
                 strategy1  = dice.blind_strategy
-            else:
+            elif strat1 == 'random':
                 strategy1  = dice.random_strategy
+            else:
+                strategy1  = dice.optimal_strategy
             strategy2 = dice.set_dices
             dice.play(strategy1,strategy2,N,D,draw)
             print(green + "Souhaitez vous jouer une autre partie? (yes/no)")
@@ -99,7 +101,14 @@ def main():
         if choice_game == 1:
             strategy1 = dice.set_dices
             strategy2 = dice.set_dices
-            dice.play(strategy1,strategy2,N,D,draw)
+            print("Lancé d'une piece non biaisée pour décider lequel des deux joueurs jouera en premier .. \n")
+            d = np.random.choice([0,1], p =[0.5,0.5])
+            if d == 1 :
+                print("C'est le joueur 1 qui entame .. \n")
+                dice.play(strategy1,strategy2,N,D,draw)
+            if d == 0 :
+                print("C'est le joueur 2 qui entame .. \n")
+                dice.play(strategy2,strategy1,N,D,draw)
             print(green + "Souhaitez vous jouer une autre partie? (yes/no)")
             r = input(green + "r = " + '')
             if r == 'yes' :
