@@ -9,20 +9,20 @@ bold = '\x1b[;1m'
 blue = '\x1b[34;6m'
 
 
-def Q(d,k):
-    """
+"""def Q(d,k):
+
     Calcule et retourne la probabilité d'obtenir k points en jetant d dés
     ----------------------------------------------------
     Args:
         - d : le nombre de dés
         - k : le nombre de points
-    """
+
     if d == 1:
         return 1/5
     if k < 2*d or k > 6*d:
         return 0
     else:
-        return 1/5*sum([Q(d-1,k-j) for j in range(2,7)])
+        return 1/5*sum([Q(d-1,k-j) for j in range(2,7)])"""
 
 def probabilities(D):
     """
@@ -31,6 +31,17 @@ def probabilities(D):
     Args:
         - D : nombre maximum de dés
     """
+    Q = np.zeros((D + 1, 6 * D + 1))
+    Q[1,2:7] = 1/5
+    for d in range(2, D+1):
+            for k in range(2*d, 6*d+1):
+                t = max(k-6,0)
+                """if k > 6 :
+                    t = k - 6
+                else:
+                    t = 0"""
+                Q[d, k] = np.sum(Q[d-1, t: k-1]) * (1/5)
+    l = np.zeros([1,6*D])
     values_D = np.arange(1,D+1)
     P = np.zeros([D,6*D])
     P[:,0] = list(map(lambda d : 1 - (5/6)**d, values_D))
@@ -39,9 +50,12 @@ def probabilities(D):
             if k+1 > 6*(d+1) or (k+1 >= 2 and k+1 <= 2*(d+1)-1):
                 P[d,k] = 0
             else:
-                P[d,k] = Q(d+1,k+1)*(5/6)**(d+1)
-    return P
+                P[d,k] = Q[d+1,k+1]*(5/6)**(d+1)
+    res = np.concatenate((l,P))
+    res[0][0] = 1
+    return res
 
+#inutile
 def roll_dice():
     """
     Retourne un nombre entre 1 et 6 qui correspond à un jet de dés
@@ -58,22 +72,14 @@ def player_roll(d,draw):
         - d : nombre de dés
         - draw : booléen permettant de controler l'affichage des dés
     """
-    counter = 0
-    dices = []
-    dice_1 = False
-    for i in range(d):
-        dice = roll_dice()
-        dices.append(dice)
-        if dice == 1 :
-            dice_1 = True
-
+    dices = np.random.randint(1,7,d)
+    if np.any(dices == 1):
+        counter = 1
+    else:
+        counter = sum(dices)
     if draw:
         print(blue + "Faces obtenues : \n")
-        dc.print_dice_rolls(dices)
-    if dice_1 is True:
-        counter = 1
-    else :
-        counter = sum(dices)
+        dc.print_dice_rolls(dices.tolist())
     return counter
 
 def random_strategy(D):
@@ -92,8 +98,10 @@ def blind_strategy(D):
     Args:
         - D : nombre maximum de dés
     """
+
     expected = np.array([(4*d-1)*((5/6)**d) + 1 for d in range(1,D+1)])
     return 1 + np.argmax(expected)
+
 
 def optimal_strategy_iter(D,P,N):
     """
@@ -104,54 +112,19 @@ def optimal_strategy_iter(D,P,N):
         - P : matrice de probabilités
         - N : nombre de points à atteindre
     """
-    E = np.ones([N+6*D,N+6*D])
-    d_opt = np.zeros([N,N])
-    E[0:N,N:N+6*D] = -1
+    E = np.full((N+6*D,N+6*D), np.nan)
+    d_opt = np.zeros([N,N], dtype = int)
+    E[:N, N:] = -1
+    E[N:, :N] =  1
     for i in range(N-1, -1, -1):
         for j in range(i, -1, -1):
-            tmp = np.array([-P[d-1,0]*(E[j,i+1]) \
-                    - np.sum([P[d-1,r-1]*(E[j,i+r]) for r in range(2*d,6*d+1)]) for d in range(1,D+1)])
-            E[i,j] = np.max(tmp)
-            E[j,i] = - E[i,j]
-            d_opt[i,j] = 1 + np.argmax(tmp)
-            d_opt[j,i] = 1 + np.argmin(tmp)
-    d_opt = d_opt.astype(int)
+            for x,y in {(i,j), (j,i)}:
+                tmp_ = [-np.sum([P[d,k]*E[y,x+k+1] for k in range(0,6 * D)]) for d in range(D+1)]
+                """tmp = - P.dot(E[y,( x + 1):( x + 6*D + 1)])"""
+                d_opt[x,y] = 1 + np.argmax(tmp_[1:])
+                E[x,y] = tmp_[d_opt[x,y]-1]
     return E, d_opt
 
-
-# ne fonctionne pas : pile de recursion déborde très rapidement
-def optimal_strategy_rec(i,j,D,P,N,memo,d_opt):
-    if i >= N and j < N :
-        return 1
-    if j >= N and i < N :
-        return 0
-    else:
-        if memo[i,j] == np.inf:
-            E = np.array([P[d-1,0]*(1-optimal_strategy_rec(j,i+1,D,P,N,memo,d_opt)) \
-                    + np.sum([P[d-1,r-1]*(1 - optimal_strategy_rec(j,i+r,D,P,N,memo,d_opt)) \
-                              for r in range(2*d,6*d+1)]) for d in range(1,D+1)])
-            memo[i,j] = np.max(E)
-            memo[j,i] = - memo[i,j]
-            if(i >= 0 and i <= N-1 and j >= 0 and j <= N-1):
-                    d_opt[i,j] = 1 + np.argmax(E)
-        return memo[i,j]
-
-
-# Pr(i,j): la probabilité de gagner lorsqu'on est dans l'état (i,j)
-def optimal_strategy_iter1(D,P,N):
-    Pr = np.ones([N+6*D,N+6*D])
-    d = np.zeros([N,N])
-    Pr[0:N,N:N+6*D] = 0
-    for i in range(N-1, -1, -1):
-        for j in range(i, -1, -1):
-            tmp = np.array([P[d-1,0]*(1- Pr[j,i+1]) \
-                    + np.sum([P[d-1,r-1]*(1 - Pr[j,i+r]) for r in range(2*d,6*d+1)]) for d in range(1,D+1)])
-            Pr[i,j] = np.max(tmp)
-            Pr[j,i] = 1 - Pr[i,j]
-            d[i,j] = 1 + np.argmax(tmp)
-            d[j,i] = 1 + np.argmin(tmp)
-    d = d.astype(int)
-    return Pr, d
 
 def optimal_strategy(d_opt,i,j):
     """
@@ -179,7 +152,7 @@ def set_dices(D):
     return d
 
 
-def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, draw=False, printing=True):
+def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, draw=False, verbose=True):
     """
     Méthode permettant de simuler une partie entre deux joueurs
     ----------------------------------------------------
@@ -196,7 +169,7 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
     score_player2 = 0
     nb_turns = 1
     while score_player1 < win_score or score_player2 < win_score :
-        if printing:
+        if verbose:
             print(blue + "Turn : ", nb_turns)
             print("Player 1 score : ", score_player1)
             print("Player 2 score : ", score_player2)
@@ -211,7 +184,7 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
 
         if score_player1 >= win_score:
             winner = 1
-            if printing:
+            if verbose:
                 print(blue + "\n\n\n\n")
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
                 print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
@@ -220,7 +193,7 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             break
 
-        if printing:
+        if verbose:
             print("Player 1 score : ", score_player1)
             print("Player 2 score : ", score_player2)
             print()
@@ -236,7 +209,7 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
 
         if score_player2 >= win_score:
             winner = 2
-            if printing:
+            if verbose:
                 print(red + "\n\n\n\n")
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
                 print("WINNER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
@@ -270,7 +243,7 @@ def expected_rewards(strategy1, strategy2, nb_games, list_N, D, P): # TODO: ajou
         if opt:
             d_opt = optimal_strategy_iter(D,P,list_N[i])[1]
         for _ in range(nb_games):
-            win = play(strategy1,strategy2,d_opt,win_score = list_N[i],number_dice = D,printing=False)
+            win = play(strategy1,strategy2,d_opt,win_score = list_N[i],number_dice = D,verbose=False)
             if win == 1:
                 rewards[i] += 1
             else:
@@ -280,7 +253,7 @@ def expected_rewards(strategy1, strategy2, nb_games, list_N, D, P): # TODO: ajou
 
 # ------------------------- Variante simultanée -------------------------------------------
 
-def play_turn(strategy1, strategy2, number_dice = 10, draw=False, printing=True):
+def play_turn(strategy1, strategy2, number_dice = 10, draw=False, verbose=True):
     """
     Méthode permettant de simuler un tour (on ne lance qu'une fois les dés)
     ----------------------------------------------------
@@ -298,7 +271,7 @@ def play_turn(strategy1, strategy2, number_dice = 10, draw=False, printing=True)
     score2 = player_roll(d2,draw)
     if score1 > score2 :
         winner = 1
-        if printing:
+        if verbose:
             print(blue + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score1)
@@ -306,7 +279,7 @@ def play_turn(strategy1, strategy2, number_dice = 10, draw=False, printing=True)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
     if score2 > score1 :
         winner = 2
-        if printing:
+        if verbose:
             print(red + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 2 remporte la partie avec un score total de : ",score2)
@@ -314,7 +287,7 @@ def play_turn(strategy1, strategy2, number_dice = 10, draw=False, printing=True)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
     else :
         winner = 0
-        if printing:
+        if verbose:
             print(red + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("EGALITE ! score obtenu par les deux joueurs : ",score2)
