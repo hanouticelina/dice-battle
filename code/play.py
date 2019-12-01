@@ -3,7 +3,7 @@ import numpy as np
 import os
 import copy
 import time
-import dice_battle as dice
+import dice_battle_seq as dice
 import print_dice
 
 
@@ -15,7 +15,7 @@ reset = '\x1b[m'
 
 def main_menu():
     os.system('clear')
-    print(bold + green + " " + "  _____    _                   ____            _     _     _       " )
+    print(bold + red + " " + "  _____    _                   ____            _     _     _       " )
     print(" "+" |  __ \  (_)                 |  _ \          | |   | |   | |       ")
     print(" "+ " | |  | |  _    ___    ___    | |_) |   __ _  | |_  | |_  | |   ___  ")
     print(" "+ " | |  | | | |  / __|  / _ \   |  _ <   / _` | | __| | __| | |  / _ \ ")
@@ -37,9 +37,9 @@ def set_dices(D,player = 0):
 def main():
     while(True):
         main_menu()
-        print(green + "(PvC) Play vs Computer")
-        print(green + "(PvP) Play PvP")
-        print(green + "(Q) Quit")
+        print(red + "(PvC) Play vs Computer")
+        print(red + "(PvP) Play PvP")
+        print(red + "(Q) Quit")
         choice=0
         while not choice:
             val = input("\nChoisissez une action parmi celles affichées ci-dessus\n")
@@ -54,26 +54,25 @@ def main():
             choice_game = 0
         else :
             choice_game = 1
-        print(green + "Veuillez saisir le nombre de points à atteindre. (100 par défaut)")
-        Nr = input(green + "N = " + '')
+        print(red + "Veuillez saisir le nombre de points à atteindre. (100 par défaut)")
+        Nr = input(red + "N = " + '')
         if (len(Nr) == 0):
             N = 100
         else:
             N = int(Nr)
 
-        print(green + "Veuillez saisir le nombre de dés maximum. (10 par défaut)")
-        Dr = input(green + "D = " + '')
+        print(red + "Veuillez saisir le nombre de dés maximum. (10 par défaut)")
+        Dr = input(red + "D = " + '')
         if (len(Dr) == 0):
             D = 10
         else:
             D = int(Dr)
-        print(green + "Souhaitez vous afficher les faces de dés obtenues? (yes/no)")
-        dr = input(green + "draw = " + '')
+        print(red + "Souhaitez vous afficher les faces de dés obtenues? (yes/no)")
+        dr = input(red + "draw = " + '')
         if (dr == 'yes'):
             draw = True
         else:
             draw = False
-        print(choice_game)
         if choice_game == 0:
             choice_d = 0
             while not choice_d:
@@ -86,14 +85,18 @@ def main():
             choice_d = 0
             if strat1 == 'blind':
                 strategy1  = dice.blind_strategy
+                d_opt = None
             elif strat1 == 'random':
                 strategy1  = dice.random_strategy
+                d_opt = None
             else:
                 strategy1  = dice.optimal_strategy
+                P = dice.probabilities(D)
+                d_opt  = dice.optimal_strategy_iter(D,P,N)[1]
             strategy2 = dice.set_dices
-            dice.play(strategy1,strategy2,N,D,draw)
-            print(green + "Souhaitez vous jouer une autre partie? (yes/no)")
-            r = input(green + "r = " + '')
+            dice.play(strategy1,strategy2,d_opt,N,D,draw,verbose=True)
+            print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+            r = input(red + "r = " + '')
             if r == 'yes' :
                 continue
             else:
@@ -105,14 +108,15 @@ def main():
             d = np.random.choice([0,1], p =[0.5,0.5])
             if d == 1 :
                 print("C'est le joueur 1 qui entame .. \n")
-                dice.play(strategy1,strategy2,N,D,draw)
+                dice.play(strategy1,strategy2,None,N,D,draw,verbose=True)
             if d == 0 :
                 print("C'est le joueur 2 qui entame .. \n")
-                dice.play(strategy2,strategy1,N,D,draw)
-            print(green + "Souhaitez vous jouer une autre partie? (yes/no)")
-            r = input(green + "r = " + '')
+                dice.play(strategy2,strategy1,None,N,D,draw,verbose=True)
+            print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+            r = input(red + "r = " + '')
             if r == 'yes' :
                 continue
             else:
                 break
+
 main()
