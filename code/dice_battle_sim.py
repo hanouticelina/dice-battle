@@ -6,7 +6,7 @@ import dice_battle_seq as ds
 from scipy.optimize import linprog
 
 
-def play_one_turn(strategy1, strategy2, number_dice = 10, draw=False, verbose=True):
+def play_one_turn(strategy1, strategy2, number_dice, P, draw=False, verbose=False):
     """
     Méthode permettant de simuler un tour (on ne lance qu'une fois les dés)
     ----------------------------------------------------
@@ -18,9 +18,15 @@ def play_one_turn(strategy1, strategy2, number_dice = 10, draw=False, verbose=Tr
         - printing : booléen permettant de controler l'affichage de l'état du jeu
     """
 
-    d1 = strategy1(number_dice)
-    score1 = ds.player_roll(d1,draw)
-    d2 = strategy2(number_dice)
+    if(strategy1==strategy_sim):
+        d1 = strategy_sim(number_dice,P)
+    else:
+        d1 = strategy1(number_dice)
+    score1 =ds.player_roll(d1,draw)
+    if(strategy2==strategy_sim):
+        d2 = strategy_sim(number_dice,P)
+    else:
+        d2 =strategy2(number_dice)
     score2 = ds.player_roll(d2,draw)
     if score1 > score2 :
         winner = 1
@@ -31,7 +37,7 @@ def play_one_turn(strategy1, strategy2, number_dice = 10, draw=False, verbose=Tr
             print("LOSER ! Le joueur 2 remporte la partie avec un score total de : ",score2)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
     elif score2 > score1 :
-        winner = 2
+        winner = -1
         if verbose:
             print(red + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
@@ -67,7 +73,7 @@ def EG(d1,d2,P):
                 s -= P[d1][k] * P[d2][l]
     return s
 
-def matrice_gain(D):
+def matrice_gain(D,P):
     """
     Méthode permettant de calculer la matrice des gains
     ----------------------------------------------------
@@ -75,12 +81,14 @@ def matrice_gain(D):
         - D : nombre maximum de dés qu'un joueur peut lancer
     """
 
-    P = ds.probabilities(D)
+    #P = ds.probabilities(D)
     G = np.zeros([D,D])
     for d1 in range(1, D+1):
         for d2 in range(1, D+1):
             G[d1-1][d2-1] = EG(d1,d2,P)
     return G
+
+
 
 def get_probas(G):
     """
@@ -92,13 +100,13 @@ def get_probas(G):
     """
     c = list(np.zeros(G.shape[0]).astype(int))
     b = list(np.zeros(G.shape[0]).astype(int))
-    """G_ = G * -1
-    G_u = np.transpose(G_).tolist()"""
+    G_ = G * -1
+    G_u = np.transpose(G_).tolist()
     A_eq = list(np.ones([1,G.shape[0]]).astype(int))
     b_eq = [1]
-    bnds = [(0,None) for _ in range(G.shape[0])]
-    res = linprog(c,A_ub = G,b_ub = b,bounds=tuple(bnds), A_eq = A_eq,b_eq = b_eq)
+    res = linprog(c,A_ub = G_u,b_ub = b, A_eq = A_eq,b_eq = b_eq)
     return res.x
+
 
 def generate_d(vector,D):
     """
@@ -107,10 +115,39 @@ def generate_d(vector,D):
     Args:
         - vector : vecteur de probabilités
         - D : nombre maximum de dés qu'un joueur peut lancer
+        
     """
     return np.random.choice(np.arange(1,D+1),p=vector)
 
-def strategy_sim(D):
-    G = matrice_gain(D)
+def strategy_sim(D,P):
+    G = matrice_gain(D,P)
     v = get_probas(G)
-    return generate_d(v,D)
+    vect=np.where(v<0,0,v)
+    return generate_d(vect,D)
+
+def random_strategy(D):
+    """
+    Retourne un nombre entre 1 et D correspondant à une stratégie aléatoire utilisée comme baseline
+    ----------------------------------------------------
+    Args:
+        - D : nombre maximum de dés
+    """
+    return random.randint(1,D)
+
+def blind_strategy(D):
+    """
+    Retourne un nombre de dés d*(D) correspondant à la stratégie aveugle
+    ----------------------------------------------------
+    Args:
+        - D : nombre maximum de dés
+    """
+
+    expected = np.array([(4*d-1)*((5/6)**d) + 1 for d in range(1,D+1)])
+    return 1 + np.argmax(expected)
+
+def expected_rewards_simult(strategy1,strategy2,nb_games, list_D):
+    rewards1 = np.zeros(len(list_D))
+    for i in range(len(list_D)):
+        P=ds.probabilities(list_D[i])
+        rewards1[i]= np.sum([play_one_turn(strategy1,strategy2,list_D[i],P) for _ in range(nb_games)])/nb_games*1.
+    return list_D,rewards1
