@@ -65,12 +65,9 @@ def EG(d1,d2,P):
     """
 
     s = 0
+    L = np.arange(1,6*d2+1)
     for k in range(1,6*d1+1):
-        for l in range(1,6*d2+1):
-            if k > l :
-                s += P[d1][k] * P[d2][l]
-            elif k < l :
-                s -= P[d1][k] * P[d2][l]
+        s += np.sum(P[d1,k]*P[d2,L[L<k]]) - np.sum(P[d1,k]*P[d2,L[L>k]])
     return s
 
 def matrice_gain(D,P):
@@ -81,12 +78,8 @@ def matrice_gain(D,P):
         - D : nombre maximum de dés qu'un joueur peut lancer
     """
 
-    #P = ds.probabilities(D)
-    G = np.zeros([D,D])
-    for d1 in range(1, D+1):
-        for d2 in range(1, D+1):
-            G[d1-1][d2-1] = EG(d1,d2,P)
-    return G
+    P = ds.probabilities(D)
+    return np.array([[EG(d1,d2,P) for d2 in range(1,D+1)] for d1 in range(1,D+1)])
 
 
 
