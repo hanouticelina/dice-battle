@@ -10,20 +10,6 @@ bold = '\x1b[;1m'
 blue = '\x1b[34;6m'
 green = '\x1b[32;6m'
 
-"""def Q(d,k):
-
-    Calcule et retourne la probabilité d'obtenir k points en jetant d dés
-    ----------------------------------------------------
-    Args:
-        - d : le nombre de dés
-        - k : le nombre de points
-
-    if d == 1:
-        return 1/5
-    if k < 2*d or k > 6*d:
-        return 0
-    else:
-        return 1/5*sum([Q(d-1,k-j) for j in range(2,7)])"""
 
 def probabilities(D):
     """
@@ -56,7 +42,7 @@ def roll_dice():
     """
     return random.randint(1,6)
 
-def player_roll(d,draw):
+def player_roll(d,draw,player = None):
     """
     Retourne le nombre total de points obtenus en lançant d dés
     ----------------------------------------------------
@@ -70,7 +56,10 @@ def player_roll(d,draw):
     else:
         counter = sum(dices)
     if draw:
-        print(bold + red + "Faces obtenues :")
+        if player:
+            print(bold + red + "Faces obtenues du joueur "+player+" :")
+        else:
+            print(bold + red + "Faces obtenues :")
         dc.print_dice_rolls(dices.tolist())
     return counter
 
@@ -142,7 +131,18 @@ def set_dices(D):
         if d <= D:
             break
     return d
-
+def play2(strategy1, strategy2, d_opt = None, N = 100, D = 10):
+    state = [0,0]
+    players = [strategy1, strategy2]
+    curr_player = 0
+    while(state[0] < N and state[1] < N):
+        if players[curr_player] == optimal_strategy :
+            d = players[curr_player](d_opt,state[curr_player],state[(curr_player+1)%2])
+        else:
+            d = players[curr_player](D)
+        state[curr_player] += player_roll(d)
+        curr_player = (curr_player+1) % 2
+    return [1, -1] if state[0]> state[1] else [-1, 1]
 
 def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, draw=False, verbose=True):
     """
@@ -193,7 +193,7 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
             print(green + "Player 2 rolls ..")
 
         if strategy2 == optimal_strategy:
-            d2 = strategy2(d_opt,score_player1,score_player2)
+            d2 = strategy2(d_opt,score_player2,score_player1)
         else:
             d2 = strategy2(number_dice)
         score2 = player_roll(d2,draw)

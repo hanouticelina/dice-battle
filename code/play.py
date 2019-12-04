@@ -3,7 +3,8 @@ import numpy as np
 import os
 import copy
 import time
-import dice_battle_seq as dice
+import dice_battle_seq as dice_seq
+import dice_battle_sim as dice_sim
 import print_dice
 
 
@@ -23,100 +24,170 @@ def main_menu():
     print(" "+ " |_____/  |_|  \___|  \___|   |____/   \__,_|  \__|  \__| |_|  \___| ")
     print(" "+"                                                                     ")
 
-def set_dices(D,player = 0):
-    if player == 0 :
-        c = blue
-    else:
-        c = red
-    while True:
-        print(c + " how many dices?\n")
-        d = int(input("d = "))
-        if d <= D:
-            break
-    return d
 def main():
     while(True):
         main_menu()
-        print(red + "(PvC) Play vs Computer")
-        print(red + "(PvP) Play PvP")
+        print(red + "(Seq) Pour jouer en variante séquentielle")
+        print(red+ "(Sim) Pour jouer en variante simultanée")
         print(red + "(Q) Quit")
         choice=0
         while not choice:
             val = input("\nChoisissez une action parmi celles affichées ci-dessus\n")
-            if(val != 'PvC') and (val != 'PvP') and (val != 'R') and (val != "Q"):
+            if(val != 'Seq') and (val != 'Sim') and (val != "Q"):
                 print("Veuillez saisir une action valide");
                 continue
             menu = 1
             break
         if val == 'Q':
             break
-        if val == 'PvC':
-            choice_game = 0
-        else :
-            choice_game = 1
-        print(red + "Veuillez saisir le nombre de points à atteindre. (100 par défaut)")
-        Nr = input(red + "N = " + '')
-        if (len(Nr) == 0):
-            N = 100
-        else:
-            N = int(Nr)
-
-        print(red + "Veuillez saisir le nombre de dés maximum. (10 par défaut)")
-        Dr = input(red + "D = " + '')
-        if (len(Dr) == 0):
-            D = 10
-        else:
-            D = int(Dr)
-        print(red + "Souhaitez vous afficher les faces de dés obtenues? (yes/no)")
-        dr = input(red + "draw = " + '')
-        if (dr == 'yes'):
-            draw = True
-        else:
-            draw = False
-        if choice_game == 0:
-            choice_d = 0
-            while not choice_d:
-                strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random \n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
-                if(strat1 != 'random') and (strat1 != 'blind') and (strat1 != 'optimal') :
-                    print("Veuillez saisir une stratégie valide");
+        if val == 'Seq':
+            print(red + "(PvC) Play vs Computer")
+            print(red + "(PvP) Play PvP")
+            print(red + "(Q) Quit")
+            choice=0
+            while not choice:
+                val = input("\nChoisissez une action parmi celles affichées ci-dessus\n")
+                if(val != 'PvC') and (val != 'PvP') and (val != 'R') and (val != "Q"):
+                    print("Veuillez saisir une action valide");
                     continue
-                choice_d = 1
+                menu = 1
                 break
-            choice_d = 0
-            if strat1 == 'blind':
-                strategy1  = dice.blind_strategy
-                d_opt = None
-            elif strat1 == 'random':
-                strategy1  = dice.random_strategy
-                d_opt = None
-            else:
-                strategy1  = dice.optimal_strategy
-                P = dice.probabilities(D)
-                d_opt  = dice.optimal_strategy_iter(D,P,N)[1]
-            strategy2 = dice.set_dices
-            dice.play(strategy1,strategy2,d_opt,N,D,draw,verbose=True)
-            print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
-            r = input(red + "r = " + '')
-            if r == 'yes' :
-                continue
-            else:
+            if val == 'Q':
                 break
-        if choice_game == 1:
-            strategy1 = dice.set_dices
-            strategy2 = dice.set_dices
-            print("Lancé d'une piece non biaisée pour décider lequel des deux joueurs jouera en premier .. \n")
-            d = np.random.choice([0,1], p =[0.5,0.5])
-            if d == 1 :
-                print("C'est le joueur 1 qui entame .. \n")
-                dice.play(strategy1,strategy2,None,N,D,draw,verbose=True)
-            if d == 0 :
-                print("C'est le joueur 2 qui entame .. \n")
-                dice.play(strategy2,strategy1,None,N,D,draw,verbose=True)
-            print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
-            r = input(red + "r = " + '')
-            if r == 'yes' :
-                continue
+            if val == 'PvC':
+                choice_game = 0
+            else :
+                choice_game = 1
+            print(red + "Veuillez saisir le nombre de points à atteindre. (100 par défaut)")
+            Nr = input(red + "N = " + '')
+            if (len(Nr) == 0):
+                N = 100
             else:
+                N = int(Nr)
+
+            print(red + "Veuillez saisir le nombre de dés maximum. (10 par défaut)")
+            Dr = input(red + "D = " + '')
+            if (len(Dr) == 0):
+                D = 10
+            else:
+                D = int(Dr)
+            print(red + "Souhaitez vous afficher les faces de dés obtenues? (yes/no)")
+            dr = input(red + "draw = " + '')
+            if (dr == 'yes'):
+                draw = True
+            else:
+                draw = False
+            if choice_game == 0:
+                choice_d = 0
+                while not choice_d:
+                    strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random \n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
+                    if(strat1 != 'random') and (strat1 != 'blind') and (strat1 != 'optimal') :
+                        print("Veuillez saisir une stratégie valide");
+                        continue
+                    choice_d = 1
+                    break
+                choice_d = 0
+                if strat1 == 'blind':
+                    strategy1  = dice_seq.blind_strategy
+                    d_opt = None
+                elif strat1 == 'random':
+                    strategy1  = dice_seq.random_strategy
+                    d_opt = None
+                else:
+                    strategy1  = dice_seq.optimal_strategy
+                    P = dice_seq.probabilities(D)
+                    d_opt  = dice_seq.optimal_strategy_iter(D,P,N)[1]
+                strategy2 = dice_seq.set_dices
+                dice_seq.play(strategy1,strategy2,d_opt,N,D,draw,verbose=True)
+                print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+                r = input(red + "r = " + '')
+                if r == 'yes' :
+                    continue
+                else:
+                    break
+            if choice_game == 1:
+                strategy1 = dice_seq.set_dices
+                strategy2 = dice_seq.set_dices
+                print("Lancé d'une piece non biaisée pour décider lequel des deux joueurs jouera en premier .. \n")
+                d = np.random.choice([0,1], p =[0.5,0.5])
+                if d == 1 :
+                    print("C'est le joueur 1 qui entame .. \n")
+                    dice_seq.play(strategy1,strategy2,None,N,D,draw,verbose=True)
+                if d == 0 :
+                    print("C'est le joueur 2 qui entame .. \n")
+                    dice_seq.play(strategy2,strategy1,None,N,D,draw,verbose=True)
+                print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+                r = input(red + "r = " + '')
+                if r == 'yes' :
+                    continue
+                else:
+                    break
+        else :
+            print(red + "(PvC) Play vs Computer")
+            print(red + "(PvP) Play PvP")
+            print(red + "(Q) Quit")
+            choice=0
+            while not choice:
+                val = input("\nChoisissez une action parmi celles affichées ci-dessus\n")
+                if(val != 'PvC') and (val != 'PvP') and (val != 'R') and (val != "Q"):
+                    print("Veuillez saisir une action valide");
+                    continue
+                menu = 1
                 break
+            if val == 'Q':
+                break
+            if val == 'PvC':
+                choice_game = 0
+            else :
+                choice_game = 1
+            print(red + "Veuillez saisir le nombre de dés maximum. (10 par défaut)")
+            Dr = input(red + "D = " + '')
+            if (len(Dr) == 0):
+                D = 10
+            else:
+                D = int(Dr)
+            print(red + "Souhaitez vous afficher les faces de dés obtenues? (yes/no)")
+            dr = input(red + "draw = " + '')
+            if (dr == 'yes'):
+                draw = True
+            else:
+                draw = False
+            if choice_game == 0:
+                choice_d = 0
+                while not choice_d:
+                    strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random '\n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
+                    if (strat1 != 'random') and (strat1 != 'blind') and (strat1 != 'optimal') :
+                        print("Veuillez saisir une stratégie valide");
+                        continue
+                    choice_d = 1
+                    break
+                choice_d = 0
+                if strat1 == 'blind':
+                    strategy1  = dice_seq.blind_strategy
+                    P = None
+                elif strat1 == 'random':
+                    strategy1  = dice_seq.random_strategy
+                    P = None
+                else:
+                    P = dice.probabilities(D)
+                    strategy1  = dice_sim.strategy_sim(D,P)
+                strategy2 = dice_seq.set_dices
+                dice_sim.play_one_turn(strategy1,strategy2,D,P,draw=draw,verbose=True)
+                print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+                r = input(red + "r = " + '')
+                if r == 'yes' :
+                    continue
+                else:
+                    break
+            if choice_game == 1:
+                strategy1 = dice_seq.set_dices
+                strategy2 = dice_seq.set_dices
+                dice_sim.play_one_turn(strategy1,strategy2,D,draw = draw,verbose=True)
+                print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
+                r = input(red + "r = " + '')
+                if r == 'yes' :
+                    continue
+                else:
+                    break
 
 main()

@@ -5,8 +5,13 @@ import print_dice as dc
 import dice_battle_seq as ds
 from scipy.optimize import linprog
 
+bold = '\x1b[;1m'
+blue = '\x1b[34;6m'
+green = '\x1b[32;6m'
+red = '\x1b[31;6m'
+reset = '\x1b[m'
 
-def play_one_turn(strategy1, strategy2, number_dice, P, draw=False, verbose=False):
+def play_one_turn(strategy1, strategy2, number_dice, P=None, draw=False, verbose=False):
     """
     Méthode permettant de simuler un tour (on ne lance qu'une fois les dés)
     ----------------------------------------------------
@@ -22,12 +27,12 @@ def play_one_turn(strategy1, strategy2, number_dice, P, draw=False, verbose=Fals
         d1 = strategy_sim(number_dice,P)
     else:
         d1 = strategy1(number_dice)
-    score1 =ds.player_roll(d1,draw)
     if(strategy2==strategy_sim):
         d2 = strategy_sim(number_dice,P)
     else:
         d2 =strategy2(number_dice)
-    score2 = ds.player_roll(d2,draw)
+    score1 =ds.player_roll(d1,draw,player ='1')
+    score2 = ds.player_roll(d2,draw,player ='2')
     if score1 > score2 :
         winner = 1
         if verbose:
@@ -70,7 +75,7 @@ def EG(d1,d2,P):
         s += np.sum(P[d1,k]*P[d2,L[L<k]]) - np.sum(P[d1,k]*P[d2,L[L>k]])
     return s
 
-def matrice_gain(D,P):
+def matrice_gain(D):
     """
     Méthode permettant de calculer la matrice des gains
     ----------------------------------------------------
@@ -108,7 +113,7 @@ def generate_d(vector,D):
     Args:
         - vector : vecteur de probabilités
         - D : nombre maximum de dés qu'un joueur peut lancer
-        
+
     """
     return np.random.choice(np.arange(1,D+1),p=vector)
 
@@ -144,3 +149,4 @@ def expected_rewards_simult(strategy1,strategy2,nb_games, list_D):
         P=ds.probabilities(list_D[i])
         rewards1[i]= np.sum([play_one_turn(strategy1,strategy2,list_D[i],P) for _ in range(nb_games)])/nb_games*1.
     return list_D,rewards1
+    
