@@ -11,6 +11,10 @@ Module: Modeling, Optimization, Graph Theory and Linear Programming
 ## Prérequis:
 Modules: numpy, itertools, scipy
 
+```bash
+sudo apt-get update && sudo apt-get install numpy itertools scipy
+```
+
 ## Structure:
 ### code:
 Le fichier `dice_battle_seq.py` contient les méthodes de la variante séquentielle.
@@ -27,4 +31,8 @@ Contient les courbes comparatives des stratégies.
 Contient le rapport du projet.
 
 
-Pour lancer le jeu, utilisez la commande suivante: `python ~/dice-battle/code/play.py`
+Pour lancer le jeu, utilisez la commande suivante: 
+
+```bash
+python ~/dice-battle/code/play.py
+```
