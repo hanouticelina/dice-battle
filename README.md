@@ -35,7 +35,3 @@ Pour lancer le jeu, utilisez la commande suivante:
 ```bash
 python ~/dice-battle/code/play.py
 ```
-<<<<<<< HEAD
-
-=======
->>>>>>> 6dd7f7dc374934111a1302a08d8ab6dd37a77882
