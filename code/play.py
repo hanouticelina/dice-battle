@@ -155,7 +155,7 @@ def main():
             if choice_game == 0:
                 choice_d = 0
                 while not choice_d:
-                    strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random '\n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
+                    strat1 = input("\nChoisissez une stratégie pour l'ordinateur parmis les suivantes : \n 'random' pour la stratégie random \n 'blind' pour la stratégie aveugle \n 'optimal' pour la stratégie optimale \n ")
                     if (strat1 != 'random') and (strat1 != 'blind') and (strat1 != 'optimal') :
                         print("Veuillez saisir une stratégie valide");
                         continue
@@ -164,15 +164,12 @@ def main():
                 choice_d = 0
                 if strat1 == 'blind':
                     strategy1  = dice_seq.blind_strategy
-                    P = None
                 elif strat1 == 'random':
                     strategy1  = dice_seq.random_strategy
-                    P = None
                 else:
-                    P = dice.probabilities(D)
-                    strategy1  = dice_sim.strategy_sim(D,P)
+                    strategy1  = dice_sim.strategy_sim
                 strategy2 = dice_seq.set_dices
-                dice_sim.play_one_turn(strategy1,strategy2,D,P,draw=draw,verbose=True)
+                dice_sim.play_one_turn(strategy1,strategy2,D,draw=draw,verbose=True)
                 print(red + "Souhaitez vous jouer une autre partie? (yes/no)")
                 r = input(red + "r = " + '')
                 if r == 'yes' :

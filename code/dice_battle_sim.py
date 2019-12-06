@@ -11,26 +11,23 @@ green = '\x1b[32;6m'
 red = '\x1b[31;6m'
 reset = '\x1b[m'
 
-def play_one_turn(strategy1, strategy2, number_dice, P=None, draw=False, verbose=False):
+def play_one_turn(strategy1, strategy2, number_dice, draw=False, verbose=False):
     """
-    Méthode permettant de simuler un tour (on ne lance qu'une fois les dés)
+    Méthode permettant de simuler un seul tour en simultanée (on ne lance qu'une fois les dés)
     ----------------------------------------------------
     Args:
         - strategy1 : stratégie du joueur 1
         - strategy2 : stratégie du joueur 2
         - number_dice : nombre maximum de dés
+        - P : matrice des probabilités (utile pour la stratégie optimale)
         - draw : booléen permettant de controler l'affichage des dés
-        - printing : booléen permettant de controler l'affichage de l'état du jeu
+        - verbose : booléen permettant de controler l'affichage de l'état du jeu
     """
 
-    if(strategy1==strategy_sim):
-        d1 = strategy_sim(number_dice,P)
-    else:
-        d1 = strategy1(number_dice)
-    if(strategy2==strategy_sim):
-        d2 = strategy_sim(number_dice,P)
-    else:
-        d2 =strategy2(number_dice)
+    d1 = strategy1(number_dice)
+    print("Le joueur 1 choisit de lancer {} dés..".format(d1))
+    d2 =strategy2(number_dice)
+    print("Le joueur 2 choisit de lancer {} dés..".format(d2))
     score1 =ds.player_roll(d1,draw,player ='1')
     score2 = ds.player_roll(d2,draw,player ='2')
     if score1 > score2 :
@@ -39,7 +36,7 @@ def play_one_turn(strategy1, strategy2, number_dice, P=None, draw=False, verbose
             print(blue + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score1)
-            print("LOSER ! Le joueur 2 remporte la partie avec un score total de : ",score2)
+            print("LOSER ! Le joueur 2 perd la partie avec un score total de : ",score2)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
     elif score2 > score1 :
         winner = -1
@@ -47,7 +44,7 @@ def play_one_turn(strategy1, strategy2, number_dice, P=None, draw=False, verbose
             print(red + "\n\n\n\n")
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             print("WINNER ! Le joueur 2 remporte la partie avec un score total de : ",score2)
-            print("LOSER ! Le joueur 1 remporte la partie avec un score total de : ",score1)
+            print("LOSER ! Le joueur 1 perd la partie avec un score total de : ",score1)
             print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
     else :
         winner = 0
@@ -117,36 +114,34 @@ def generate_d(vector,D):
     """
     return np.random.choice(np.arange(1,D+1),p=vector)
 
-def strategy_sim(D,P):
-    G = matrice_gain(D,P)
+def strategy_sim(D):
+    """
+    Méthode permettant de renvoyer une stratégie optimal
+    ----------------------------------------------------
+    Args:
+        - D : nombre maximum de dés qu'un joueur peut lancer
+        - P : matrice de probabilités
+
+    """
+    G = matrice_gain(D)
     v = get_probas(G)
     vect=np.where(v<0,0,v)
     return generate_d(vect,D)
 
-def random_strategy(D):
-    """
-    Retourne un nombre entre 1 et D correspondant à une stratégie aléatoire utilisée comme baseline
-    ----------------------------------------------------
-    Args:
-        - D : nombre maximum de dés
-    """
-    return random.randint(1,D)
 
-def blind_strategy(D):
-    """
-    Retourne un nombre de dés d*(D) correspondant à la stratégie aveugle
-    ----------------------------------------------------
-    Args:
-        - D : nombre maximum de dés
-    """
-
-    expected = np.array([(4*d-1)*((5/6)**d) + 1 for d in range(1,D+1)])
-    return 1 + np.argmax(expected)
 
 def expected_rewards_simult(strategy1,strategy2,nb_games, list_D):
+    """
+    Méthode permettant de calculer l'espérance de gain pour le joueur 1  en simulant plusieurs parties et en faisant varier le nombre de dés maximum (D)
+    ----------------------------------------------------
+    Args:
+        - strategy1 : stratégie du joueur 1
+        - strategy2 : stratégie du joueur 2
+        - nb_games : nombre de parties à simuler
+        - list_D : liste des valeurs de D considérées
+    """
     rewards1 = np.zeros(len(list_D))
     for i in range(len(list_D)):
         P=ds.probabilities(list_D[i])
         rewards1[i]= np.sum([play_one_turn(strategy1,strategy2,list_D[i],P) for _ in range(nb_games)])/nb_games*1.
     return list_D,rewards1
-    

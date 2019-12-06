@@ -19,6 +19,7 @@ def probabilities(D):
         - D : nombre maximum de dés
     """
     Q = np.zeros((D + 1, 6 * D + 1))
+    # cas d'initialisation de Q pour d=1
     Q[1,2:7] = 1/5
     for d in range(2, D+1):
             for k in range(2*d, 6*d+1):
@@ -26,6 +27,7 @@ def probabilities(D):
                 Q[d, k] = np.sum(Q[d-1, t: k-1]) * (1/5)
     values_D = np.arange(1,D+1)
     P = np.zeros((D+1,6*D+1))
+    # cas ou k=1 (au moins un dé tombe sur 1)
     P[1:,1] = list(map(lambda d : 1 - (5/6)**d, values_D))
     for d in range(P.shape[0]):
         for k in range(2,P.shape[1]):
@@ -34,13 +36,6 @@ def probabilities(D):
     return P
 
 
-def roll_dice():
-    """
-    Retourne un nombre entre 1 et 6 qui correspond à un jet de dés
-    ----------------------------------------------------
-    Args:
-    """
-    return random.randint(1,6)
 
 def player_roll(d,draw,player = None):
     """
@@ -50,11 +45,14 @@ def player_roll(d,draw,player = None):
         - d : nombre de dés
         - draw : booléen permettant de controler l'affichage des dés
     """
+    # on lance d dés
     dices = np.random.randint(1,7,d)
+    #Si au moins un dé tombe sur 1
     if np.any(dices == 1):
         counter = 1
     else:
         counter = sum(dices)
+    # permet de controler l'affichage des dés lancés
     if draw:
         if player:
             print(bold + red + "Faces obtenues du joueur "+player+" :")
@@ -93,10 +91,13 @@ def optimal_strategy_iter(D,P,N):
         - P : matrice de probabilités
         - N : nombre de points à atteindre
     """
-    E = np.full((N+6*D,N+6*D), np.nan)
+    E = np.full((N+6*D,N+6*D), np.inf)
+    # permet de stocker le nombre de dés optimal pour chaque état (i,j) (on s'interesse qu'aux états ou i<N et j<N)
     d_opt = np.zeros([N,N], dtype = int)
+    # on remplit les cas de base : quand i >= N ou j >= N
     E[:N, N:] = -1
     E[N:, :N] =  1
+    # on fait un parcours inverse de la matrice
     for i in range(N-1, -1, -1):
         for j in range(i, -1, -1):
             for x,y in list(permutations((i,j))):
@@ -123,7 +124,7 @@ def set_dices(D):
     Permet à un joueur de choisir le nombre de dés à lancer à chaque tour
     ----------------------------------------------------
     Args:
-        - D : nombre maximum de dés qu'un joeur peut lancer
+        - D : nombre maximum de dés qu'un joueur peut lancer
     """
     while True:
         print(bold + red + " how many dices?\n")
@@ -131,18 +132,6 @@ def set_dices(D):
         if d <= D:
             break
     return d
-def play2(strategy1, strategy2, d_opt = None, N = 100, D = 10):
-    state = [0,0]
-    players = [strategy1, strategy2]
-    curr_player = 0
-    while(state[0] < N and state[1] < N):
-        if players[curr_player] == optimal_strategy :
-            d = players[curr_player](d_opt,state[curr_player],state[(curr_player+1)%2])
-        else:
-            d = players[curr_player](D)
-        state[curr_player] += player_roll(d)
-        curr_player = (curr_player+1) % 2
-    return [1, -1] if state[0]> state[1] else [-1, 1]
 
 def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, draw=False, verbose=True):
     """
@@ -151,20 +140,17 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
     Args:
         - strategy1 : stratégie du joueur 1
         - strategy2 : stratégie du joueur 2
-        - d_opt : tableau contenant le nombre de dés optimal a lancer selon l'état du jeu (stratégie optimale)
+        - d_opt : tableau contenant le nombre de dés optimal a lancer selon l'état du jeu (utile uniquement pour la stratégie optimale)
         - win_score : Nombre de points à atteindre
         - number_dice : nombre maximum de dés
         - draw : booléen permettant de controler l'affichage des dés
-        - printing : booléen permettant de controler l'affichage de l'état du jeu
+        - verbose : booléen permettant de controler l'affichage de l'état du jeu
     """
     score_player1 = 0
     score_player2 = 0
     nb_turns = 1
     while score_player1 < win_score or score_player2 < win_score :
         if verbose:
-            print(bold + red + "Turn : ", nb_turns)
-            print("Player 1 score : ", score_player1)
-            print("Player 2 score : ", score_player2)
             print()
             print(blue + "Player 1 rolls ..")
         if strategy1 == optimal_strategy :
@@ -180,8 +166,8 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
                 print(blue + "\n\n\n\n")
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
                 print("WINNER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
-                print("LOSER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
-                print("Nombre de tour : ",nb_turns+1)
+                print("LOSER ! Le joueur 2 perd la partie avec un score total de : ",score_player2)
+                print("Nombre de tour : ",nb_turns)
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
             break
 
@@ -205,18 +191,23 @@ def play(strategy1, strategy2, d_opt = None, win_score = 100, number_dice = 10, 
                 print(green + "\n\n\n\n")
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
                 print("WINNER ! Le joueur 2 remporte la partie avec un score total de : ",score_player2)
-                print("LOSER ! Le joueur 1 remporte la partie avec un score total de : ",score_player1)
-                print("Nombre de tour : ",nb_turns+1)
+                print("LOSER ! Le joueur 1 perd la partie avec un score total de : ",score_player1)
+                print("Nombre de tour : ",nb_turns)
                 print("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°")
                 print()
             break
+
+        if verbose:
+            print(bold + red + "Turn : ", nb_turns)
+            print("Player 1 score : ", score_player1)
+            print("Player 2 score : ", score_player2)
 
         nb_turns += 1
     return winner
 
 def expected_rewards(strategy1, strategy2, nb_games, list_N, D, P,reverse=False):
     """
-    Méthode permettant de calculer l'esperance de gain pour le joueur 1 en simulant plusieurs parties et en faisant varier N
+    Méthode permettant de calculer l'espérance de gain pour le joueur 1 ou le joueur 2 en simulant plusieurs parties et en faisant varier N
     ----------------------------------------------------
     Args:
         - strategy1 : stratégie du joueur 1
@@ -225,7 +216,7 @@ def expected_rewards(strategy1, strategy2, nb_games, list_N, D, P,reverse=False)
         - list_N : liste des valeurs de N considérées
         - D : nombre maximum de dés
         - P : Tableau de probabilités
-        - reverse : booléen permettant de controler pour lequel des deux joueurs on souhaite calculer l'esperance de gain
+        - reverse : booléen permettant de controler pour lequel des deux joueurs on souhaite calculer l'espérance de gain
     """
     rewards = np.zeros(len(list_N))
     opt = False
@@ -242,6 +233,17 @@ def expected_rewards(strategy1, strategy2, nb_games, list_N, D, P,reverse=False)
     return list_N, rewards
 
 def expected_rewards_D(strategy1, strategy2, nb_games, N, list_D,reverse=False):
+    """
+    Méthode permettant de calculer l'espérance de gain pour le joueur 1 ou le joueur 2 en simulant plusieurs parties et en faisant varier D
+    ----------------------------------------------------
+    Args:
+        - strategy1 : stratégie du joueur 1
+        - strategy2 : stratégie du joueur 2
+        - nb_games : nombre de parties à simuler
+        - D : nombre de points à atteindre pour gagner la partie
+        - list_D : liste des valeurs de D considérées
+        - reverse : booléen permettant de controler pour lequel des deux joueurs on souhaite calculer l'espérance de gain
+    """
     rewards = np.zeros(len(list_D))
     opt = False
     d_opt = None
