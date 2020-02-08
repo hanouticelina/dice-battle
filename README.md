@@ -24,8 +24,6 @@ Le fichier `print_dice.py` contient les méthodes permettant de dessiner et d'af
 
 Le fichier `play.py` contient le code permettant de lancer le jeu.
 
-### imgs:
-Contient les courbes comparatives des stratégies.
 ### report
 Contient le rapport du projet.
 
